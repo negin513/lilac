@@ -148,41 +148,17 @@ module lilac_mod
         !print *,      a2c_fldlist(3)%farrayptr1d
 
 
-        !!! Where should these point to? pointer to an empty array which will be filled in the land....
-
-        ! Similary we need c2a_fldlist
-        c2l_fldlist(1)%stdname      =  'uwind'
-        print *,      c2l_fldlist(1)%stdname
-        c2l_fldlist(2)%stdname      =  'vwind'
-        print *,      c2l_fldlist(1)%stdname
-        c2l_fldlist(3)%stdname      =  'tbot'
-        print *,      c2l_fldlist(1)%stdname
-
         !-------------------------------------------------------------------------
         !            !---- from land ----! l2c_fldlist & c2a_fldlist
         !-------------------------------------------------------------------------
 
-
-        l2c_fldlist(1)%stdname      =  'lwup'
-        l2c_fldlist(1)%farrayptr1d  => lnd2atm1d%lwup
-        print *,      l2c_fldlist(1)%stdname
-
-        l2c_fldlist(2)%stdname      =  'taux'
-        print *,      l2c_fldlist(2)%stdname
-        l2c_fldlist(2)%farrayptr1d  => lnd2atm1d%taux
-
-        l2c_fldlist(3)%stdname      =  'tauy'
-        print *,      l2c_fldlist(3)%stdname
-        l2c_fldlist(3)%farrayptr1d  => lnd2atm1d%taux
-
-
-        c2a_fldlist(1)%stdname      =  'lwup'
+        c2a_fldlist(1)%stdname      =  'Fall_lwup'
         print *,      c2a_fldlist(1)%stdname
 
-        c2a_fldlist(2)%stdname      =  'taux'
+        c2a_fldlist(2)%stdname      =  'Fall_taux'
         print *,      c2a_fldlist(2)%stdname
 
-        c2a_fldlist(3)%stdname      =  'tauy'
+        c2a_fldlist(3)%stdname      =  'Fall_tauy'
         print *,      c2a_fldlist(3)%stdname
 
         ! ======================================================================= ! create_fldlist
