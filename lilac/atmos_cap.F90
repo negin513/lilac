@@ -137,10 +137,21 @@ module atmos_cap
         ! Create individual fields and add to field bundle -- a2l
 
         !call fldlist_add(a2c_fldlist_num, a2c_fldlist, 'dum_var2'      )
-        a2c_fldlist_num = 17
+        a2c_fldlist_num = 29
 
         do n = 1,a2c_fldlist_num
 
+           if (myid == 0) then
+               print *, 'Here we are printing field!'
+               print *, "**********************************************************"
+               print *, "creating field for a2l:"
+               print *, n
+               print *, trim(a2c_fldlist(n)%stdname)
+               !print *, a2c_fldlist(n)%farrayptr1d
+               !call ESMF_FieldPrint(field,  rc=rc)
+               print *, "---------------------------------------------------"
+               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return  ! bail out
+           end if 
            ! create field
            !!! Here we want to pass pointers
            !field = ESMF_FieldCreate(atmos_mesh, ESMF_TYPEKIND_R8 ,  meshloc=ESMF_MESHLOC_ELEMENT , name=trim(a2c_fldlist(n)%stdname), rc=rc)
@@ -150,15 +161,6 @@ module atmos_cap
            !call ESMF_FieldFill(field, dataFillScheme = "sincos" , rc=rc)
            !call ESMF_FieldFill(field, dataFillScheme = "const"  , const1=real(n, ESMF_KIND_R8), rc=rc)
            !if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return  ! bail out
-           if (myid == 0) then
-               print *, 'Here we are printing field!'
-               print *, "**********************************************************"
-               print *, "creating field for a2l:"
-               print *, trim(a2c_fldlist(n)%stdname)
-               print *, a2c_fldlist(n)%farrayptr1d
-               call ESMF_FieldPrint(field,  rc=rc)
-               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return  ! bail out
-           end if 
            !call ESMF_LogWrite(subname//"fieldget!", ESMF_LOGMSG_INFO)
            !call ESMF_FieldGet(field,  rc=rc)
            !if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return  ! bail out

@@ -14,6 +14,13 @@ module lilac_utils
     integer, parameter              :: fldsMax = 100
 
     character(*) , parameter                          :: modname     = "lilac_utils"
+
+
+    logical                :: flds_co2a   = .false.     ! use case
+    logical                :: flds_co2b   = .false.     ! use case
+    logical                :: flds_co2c   = .true.   ! use case
+    !integer                :: glc_nec          ! number of glc elevation classes 
+    integer, parameter     :: debug = 1        ! internal debug level
     ! !PUBLIC TYPES:
     type                            :: fld_list_type
         character(len=128)          :: stdname
@@ -35,7 +42,6 @@ module lilac_utils
         real*8, pointer    :: Sa_pbot  (:)
         real*8, pointer    :: Sa_tbot  (:)
         real*8, pointer    :: Sa_shum  (:)
-       !real*8, pointer    :: Sa_methane  (:)
        ! from atm - fluxes
         real*8, pointer    :: Faxa_lwdn  (:)
         real*8, pointer    :: Faxa_rainc  (:)
@@ -46,30 +52,59 @@ module lilac_utils
         real*8, pointer    :: Faxa_swvdr  (:)
         real*8, pointer    :: Faxa_swndf  (:)
         real*8, pointer    :: Faxa_swvdf  (:)
+        !atmospheric prognostic/prescribed aerosol fields (7)
+        real*8, pointer    :: Faxa_bcph  (:)
+        real*8, pointer    :: Faxa_ocph  (:)
+        real*8, pointer    :: Faxa_dstwet    (:)
+        real*8, pointer    :: Faxa_dstdry    (:)
+        real*8, pointer    :: Sa_methane (:)
+        real*8, pointer    :: Faxa_nhx        (:)
+        real*8, pointer    :: Faxa_noy        (:)
+        !Atmosphere co2 (2)
+        real*8, pointer    :: Sa_co2prog (:)
+        real*8, pointer    :: Sa_co2diag (:)
+        !Flooding back from river (3)
+        real*8, pointer    :: Flrr_flood   (:)
+        real*8, pointer    :: Flrr_volr    (:)
+        real*8, pointer    :: Flrr_volrmch (:)
     end type                  atm2lnd_data1d_type
 
 !
 
     type , public          :: atm2lnd_data2d_type
-        real*8, pointer    :: Sa_z (:,:)
+        real*8, pointer    :: Sa_z    (:,:)
         real*8, pointer    :: Sa_topo (:,:)
-        real*8, pointer    :: Sa_u  (:,:)
-        real*8, pointer    :: Sa_v  (:,:)
-        real*8, pointer    :: Sa_ptem  (:,:)
-        real*8, pointer    :: Sa_pbot  (:,:)
-        real*8, pointer    :: Sa_tbot  (:,:)
-        real*8, pointer    :: Sa_shum  (:,:)
-       !real*8, pointer    :: Sa_methane  (:,:)
+        real*8, pointer    :: Sa_u    (:,:)
+        real*8, pointer    :: Sa_v    (:,:)
+        real*8, pointer    :: Sa_ptem (:,:)
+        real*8, pointer    :: Sa_pbot (:,:)
+        real*8, pointer    :: Sa_tbot (:,:)
+        real*8, pointer    :: Sa_shum (:,:)
        ! from atm - fluxes
         real*8, pointer    :: Faxa_lwdn  (:,:)
-        real*8, pointer    :: Faxa_rainc  (:,:)
-        real*8, pointer    :: Faxa_rainl  (:,:)
-        real*8, pointer    :: Faxa_snowc  (:,:)
-        real*8, pointer    :: Faxa_snowl  (:,:)
-        real*8, pointer    :: Faxa_swndr  (:,:)
-        real*8, pointer    :: Faxa_swvdr  (:,:)
-        real*8, pointer    :: Faxa_swndf  (:,:)
-        real*8, pointer    :: Faxa_swvdf  (:,:)
+        real*8, pointer    :: Faxa_rainc (:,:)
+        real*8, pointer    :: Faxa_rainl (:,:)
+        real*8, pointer    :: Faxa_snowc (:,:)
+        real*8, pointer    :: Faxa_snowl (:,:)
+        real*8, pointer    :: Faxa_swndr (:,:)
+        real*8, pointer    :: Faxa_swvdr (:,:)
+        real*8, pointer    :: Faxa_swndf (:,:)
+        real*8, pointer    :: Faxa_swvdf (:,:)
+        !atmospheric prognostic/prescribed aerosol fields
+        real*8, pointer    :: Faxa_bcph  (:,:)
+        real*8, pointer    :: Faxa_ocph  (:,:)
+        real*8, pointer    :: Faxa_dstwet    (:,:)
+        real*8, pointer    :: Faxa_dstdry    (:,:)
+        real*8, pointer    :: Sa_methane (:,:)
+        real*8, pointer    :: Faxa_nhx        (:,:)
+        real*8, pointer    :: Faxa_noy        (:,:)
+        !Atmosphere co2
+        real*8, pointer    :: Sa_co2prog (:,:)
+        real*8, pointer    :: Sa_co2diag (:,:)
+        !Flooding back from river
+        real*8, pointer    :: Flrr_flood   (:,:)
+        real*8, pointer    :: Flrr_volr    (:,:)
+        real*8, pointer    :: Flrr_volrmch (:,:)
     end type                  atm2lnd_data2d_type
 
 
@@ -241,6 +276,51 @@ module lilac_utils
         ! call fldlist_add(fldsToCpl_num, fldsToCpl, 'Faxa_bcphodry')
         ! call fldlist_add(fldsToCpl_num, fldsToCpl, 'Faxa_bcphiwet')
 
+        ! from atm - black carbon deposition fluxes (3)
+        ! (1) => bcphidry, (2) => bcphodry, (3) => bcphiwet
+        call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_bcph',  ungridded_lbound=1, ungridded_ubound=3)
+        !call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_bcph')
+
+        ! from atm - organic carbon deposition fluxes (3)
+        ! (1) => ocphidry, (2) => ocphodry, (3) => ocphiwet
+        call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_ocph',  ungridded_lbound=1, ungridded_ubound=3)
+        !call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_ocph') !,  ungridded_lbound=1, ungridded_ubound=3)
+
+        ! from atm - wet dust deposition frluxes (4 sizes)
+        ! (1) => dstwet1, (2) => dstwet2, (3) => dstwet3, (4) => dstwet4 
+        call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_dstwet', ungridded_lbound=1, ungridded_ubound=4)
+        !call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_dstwet')! , ungridded_lbound=1, ungridded_ubound=4)
+
+        ! from - atm dry dust deposition frluxes (4 sizes)
+        call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_dstdry', ungridded_lbound=1, ungridded_ubound=4)
+        !call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_dstdry') !, ungridded_lbound=1, ungridded_ubound=4)
+
+
+        ! from atm - nitrogen deposition
+        !call shr_ndep_readnl("drv_flds_in", ndep_nflds)
+        !if (ndep_nflds > 0) then
+           !call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Faxa_ndep', ungridded_lbound=1, ungridded_ubound=ndep_nflds)
+           ! This sets a variable in clm_varctl
+           !ndep_from_cpl = .true.
+        !end if
+
+
+
+        ! from atm - co2 exchange scenarios
+        if (flds_co2a .or. flds_co2b .or. flds_co2c) then
+           call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Sa_co2prog')
+           call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Sa_co2diag')
+        end if
+
+        rof_prognostic = .true.
+        if (rof_prognostic) then
+            ! from river
+            call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Flrr_flood'   )
+            call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Flrr_volr'    )
+            call fldlist_add(fldsToLnd_num, a2c_fldlist, 'Flrr_volrmch' )
+        end if
+
+
         !--------------------------c2l_fldlist------------------------------------
         ! from atm - states
         call fldlist_add(fldsToLnd_num, c2l_fldlist, 'Sa_z'         )
@@ -266,21 +346,26 @@ module lilac_utils
         call fldlist_add(fldsToLnd_num, c2l_fldlist, 'Faxa_swvdf'   )
         call ESMF_LogWrite(subname//"from atmosphere fluxes are added!", ESMF_LOGMSG_INFO)
 
-        !-------------------------------------------------------------------------
-        !            !---- from lnd ----! l2c_fldlist &  c2a_fldlist
-        !-------------------------------------------------------------------------
-        !--------------------------l2c_fldlist------------------------------------
-        ! export land states
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_lfrin'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_t'          )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_tref'       )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_qref'       )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_avsdr'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_anidr'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_avsdf'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_anidf'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_snowh'      )
-        call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_u10'        )
+
+
+
+
+
+    !-------------------------------------------------------------------------
+    !            !---- from lnd ----! l2c_fldlist &  c2a_fldlist
+    !-------------------------------------------------------------------------
+    !--------------------------l2c_fldlist------------------------------------
+    ! export land states
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_lfrin'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_t'          )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_tref'       )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_qref'       )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_avsdr'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_anidr'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_avsdf'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_anidf'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_snowh'      )
+    call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_u10'        )
         call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_fv'         )
         call fldlist_add(fldsFrLnd_num, l2c_fldlist, 'Sl_ram1'       )
         call ESMF_LogWrite(subname//"l2c: from land states are added!", ESMF_LOGMSG_INFO)

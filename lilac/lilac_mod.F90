@@ -22,7 +22,7 @@ module lilac_mod
     !TODO (NS,2019-08-07):
     ! We will move this later to lnd_cap (ctsm_cap) and atmos_cap
     !use atmos_cap     ,  only :         a2l_fldnum
-    integer    , public ,  parameter                  :: a2l_fldnum        =  17
+    integer    , public ,  parameter                  :: a2l_fldnum        =  29
     integer    , public ,  parameter                  :: l2a_fldnum        =  12
 
     public                                            :: lilac_init
@@ -239,6 +239,19 @@ module lilac_mod
         a2c_fldlist(15)%farrayptr1d  =>  atm2lnd1d%Faxa_swvdr
         a2c_fldlist(16)%farrayptr1d  =>  atm2lnd1d%Faxa_swndf
         a2c_fldlist(17)%farrayptr1d  =>  atm2lnd1d%Faxa_swvdf
+
+        a2c_fldlist(18)%farrayptr1d  =>  atm2lnd1d%Faxa_bcph
+        a2c_fldlist(19)%farrayptr1d  =>  atm2lnd1d%Faxa_ocph
+        a2c_fldlist(20)%farrayptr1d  =>  atm2lnd1d%Faxa_dstwet
+        a2c_fldlist(21)%farrayptr1d  =>  atm2lnd1d%Faxa_dstdry
+        a2c_fldlist(22)%farrayptr1d  =>  atm2lnd1d%Sa_methane
+        a2c_fldlist(23)%farrayptr1d  =>  atm2lnd1d%Faxa_nhx
+        a2c_fldlist(24)%farrayptr1d  =>  atm2lnd1d%Faxa_noy
+        a2c_fldlist(25)%farrayptr1d  =>  atm2lnd1d%Sa_co2prog
+        a2c_fldlist(26)%farrayptr1d  =>  atm2lnd1d%Sa_co2diag
+        a2c_fldlist(27)%farrayptr1d  =>  atm2lnd1d%Flrr_flood
+        a2c_fldlist(28)%farrayptr1d  =>  atm2lnd1d%Flrr_volr
+        a2c_fldlist(29)%farrayptr1d  =>  atm2lnd1d%Flrr_volrmch
         !-------------------------------------------------------------------------
 
         ! should I point to zero???

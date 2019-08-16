@@ -71,23 +71,38 @@ program demo_lilac_driver
     allocate ( rand2                   (begc:endc) ) ; call random_number (rand2)
 
     !allocating these values of default for now!
-    allocate ( atm2lnd%Sa_z       (begc:endc) ) ; atm2lnd%Sa_z       (:) =  30.0
-    allocate ( atm2lnd%Sa_topo    (begc:endc) ) ; atm2lnd%Sa_topo    (:) =  10.0
-    allocate ( atm2lnd%Sa_u       (begc:endc) ) ; atm2lnd%Sa_u       (:) =  20.0
-    allocate ( atm2lnd%Sa_v       (begc:endc) ) ; atm2lnd%Sa_v       (:) =  40.0
-    allocate ( atm2lnd%Sa_ptem    (begc:endc) ) ; atm2lnd%Sa_ptem    (:) =  280.0
-    allocate ( atm2lnd%Sa_pbot    (begc:endc) ) ; atm2lnd%Sa_pbot    (:) =  100100.0
-    allocate ( atm2lnd%Sa_tbot    (begc:endc) ) ; atm2lnd%Sa_tbot    (:) =  280.0
-    allocate ( atm2lnd%Sa_shum    (begc:endc) ) ; atm2lnd%Sa_shum    (:) =  0.0004
-    allocate ( atm2lnd%Faxa_lwdn  (begc:endc) ) ; atm2lnd%Faxa_lwdn  (:) =  200.0
-    allocate ( atm2lnd%Faxa_rainc (begc:endc) ) ; atm2lnd%Faxa_rainc (:) =  4.0e-8
-    allocate ( atm2lnd%Faxa_rainl (begc:endc) ) ; atm2lnd%Faxa_rainl (:) =  3.0e-8
-    allocate ( atm2lnd%Faxa_snowc (begc:endc) ) ; atm2lnd%Faxa_snowc (:) =  1.0e-8
-    allocate ( atm2lnd%Faxa_snowl (begc:endc) ) ; atm2lnd%Faxa_snowl (:) =  2.0e-8
-    allocate ( atm2lnd%Faxa_swndr (begc:endc) ) ; atm2lnd%Faxa_swndr (:) =  100.0
-    allocate ( atm2lnd%Faxa_swvdr (begc:endc) ) ; atm2lnd%Faxa_swvdr (:) =  90.0
-    allocate ( atm2lnd%Faxa_swndf (begc:endc) ) ; atm2lnd%Faxa_swndf (:) =  20.0
-    allocate ( atm2lnd%Faxa_swvdf (begc:endc) ) ; atm2lnd%Faxa_swvdf (:) =  40.0
+    allocate ( atm2lnd%Sa_z         (begc:endc) ) ; atm2lnd%Sa_z         (:) = 30.0
+    allocate ( atm2lnd%Sa_topo      (begc:endc) ) ; atm2lnd%Sa_topo      (:) = 10.0
+    allocate ( atm2lnd%Sa_u         (begc:endc) ) ; atm2lnd%Sa_u         (:) = 20.0
+    allocate ( atm2lnd%Sa_v         (begc:endc) ) ; atm2lnd%Sa_v         (:) = 40.0
+    allocate ( atm2lnd%Sa_ptem      (begc:endc) ) ; atm2lnd%Sa_ptem      (:) = 280.0
+    allocate ( atm2lnd%Sa_pbot      (begc:endc) ) ; atm2lnd%Sa_pbot      (:) = 100100.0
+    allocate ( atm2lnd%Sa_tbot      (begc:endc) ) ; atm2lnd%Sa_tbot      (:) = 280.0
+    allocate ( atm2lnd%Sa_shum      (begc:endc) ) ; atm2lnd%Sa_shum      (:) = 0.0004
+    allocate ( atm2lnd%Faxa_lwdn    (begc:endc) ) ; atm2lnd%Faxa_lwdn    (:) = 200.0
+    allocate ( atm2lnd%Faxa_rainc   (begc:endc) ) ; atm2lnd%Faxa_rainc   (:) = 4.0e-8
+    allocate ( atm2lnd%Faxa_rainl   (begc:endc) ) ; atm2lnd%Faxa_rainl   (:) = 3.0e-8
+    allocate ( atm2lnd%Faxa_snowc   (begc:endc) ) ; atm2lnd%Faxa_snowc   (:) = 1.0e-8
+    allocate ( atm2lnd%Faxa_snowl   (begc:endc) ) ; atm2lnd%Faxa_snowl   (:) = 2.0e-8
+    allocate ( atm2lnd%Faxa_swndr   (begc:endc) ) ; atm2lnd%Faxa_swndr   (:) = 100.0
+    allocate ( atm2lnd%Faxa_swvdr   (begc:endc) ) ; atm2lnd%Faxa_swvdr   (:) = 90.0
+    allocate ( atm2lnd%Faxa_swndf   (begc:endc) ) ; atm2lnd%Faxa_swndf   (:) = 20.0
+    allocate ( atm2lnd%Faxa_swvdf   (begc:endc) ) ; atm2lnd%Faxa_swvdf   (:) = 40.0
+    !atmospheric prognostic/prescribed aerosol fields
+    allocate ( atm2lnd%Faxa_bcph    (begc:endc) ) ; atm2lnd%Faxa_bcph    (:) = 0.0
+    allocate ( atm2lnd%Faxa_ocph    (begc:endc) ) ; atm2lnd%Faxa_ocph    (:) = 0.0
+    allocate ( atm2lnd%Faxa_dstwet  (begc:endc) ) ; atm2lnd%Faxa_dstwet  (:) = 0.0
+    allocate ( atm2lnd%Faxa_dstdry  (begc:endc) ) ; atm2lnd%Faxa_dstdry  (:) = 0.0
+    allocate ( atm2lnd%Sa_methane   (begc:endc) ) ; atm2lnd%Sa_methane   (:) = 0.0
+    allocate ( atm2lnd%Faxa_nhx     (begc:endc) ) ; atm2lnd%Faxa_nhx     (:) = 0.0
+    allocate ( atm2lnd%Faxa_noy     (begc:endc) ) ; atm2lnd%Faxa_noy     (:) = 0.0
+    !Atmosphere co2
+    allocate ( atm2lnd%Sa_co2prog   (begc:endc) ) ; atm2lnd%Sa_co2prog   (:) = 0.0
+    allocate ( atm2lnd%Sa_co2diag   (begc:endc) ) ; atm2lnd%Sa_co2diag   (:) = 0.0
+    !Flooding back from river
+    allocate ( atm2lnd%Flrr_flood   (begc:endc) ) ; atm2lnd%Flrr_flood   (:) = 0.0
+    allocate ( atm2lnd%Flrr_volr    (begc:endc) ) ; atm2lnd%Flrr_volr    (:) = 0.0
+    allocate ( atm2lnd%Flrr_volrmch (begc:endc) ) ; atm2lnd%Flrr_volrmch (:) = 0.0
 
     !endc       = 18048 ? should this be the size of the land or atmosphere???
 
