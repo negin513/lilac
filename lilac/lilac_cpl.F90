@@ -34,7 +34,6 @@ contains
 
     ! local variables
     type(ESMF_VM) :: vm
-    integer       :: mytask
     character(len=*) , parameter :: subname=trim(modname ) //' : [cpl_atm2lnd_register] '
     !---------------------------------------------------
 
@@ -45,6 +44,7 @@ contains
     call ESMF_VMGet(vm, localPet=mytask, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
 
+    print *,'mytask= ',mytask
     if (mytask == 0) then
        print *, "in cpl_atm2lnd_register routine"
     end if
@@ -107,7 +107,7 @@ contains
     integer                         :: fieldcount
     character(len=128), allocatable :: fieldlist(:)
     character(len=128)              :: cvalue
-    character(len=*), parameter :: subname=trim(modname) //': [cpl_atm2lnd_init] '
+    character(len=*), parameter     :: subname=trim(modname) //': [cpl_atm2lnd_init] '
     !---------------------------------------------------
 
     rc = ESMF_SUCCESS
@@ -118,10 +118,7 @@ contains
 
     call ESMF_StateGet(importState, "a2c_fb", import_fieldbundle, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
-    call ESMF_StateGet(exportState, "c2l_fb", export_fieldbundle, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
 
-    ! DEBUG: write out the field bundle field names
     call ESMF_FieldBundleGet(import_fieldbundle, fieldCount=fieldCount, rc=rc) 
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
     write(cvalue,*) fieldcount
@@ -137,21 +134,23 @@ contains
        print *, ' a2c_fb field count = ',fieldcount
     end if
 
+    call ESMF_StateGet(exportState, "c2l_fb", export_fieldbundle, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+
     call ESMF_FieldBundleGet(export_fieldbundle, fieldCount=fieldCount, rc=rc) 
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
     write(cvalue,*) fieldcount
-    call ESMF_LogWrite(subname//" c2f_fb field count = "//trim(cvalue), ESMF_LOGMSG_INFO)
+    call ESMF_LogWrite(subname//" c2l_fb field count = "//trim(cvalue), ESMF_LOGMSG_INFO)
     allocate(fieldlist(fieldcount))
     call ESMF_FieldBundleGet(export_fieldbundle, fieldNameList=fieldlist, rc=rc) 
     do n = 1,fieldCount
        write(cvalue,*) n 
-       call ESMF_LogWrite(subname//" c2f_fb field "//trim(cvalue)//' = '//trim(fieldlist(n)), ESMF_LOGMSG_INFO)
+       call ESMF_LogWrite(subname//" c2l_fb field "//trim(cvalue)//' = '//trim(fieldlist(n)), ESMF_LOGMSG_INFO)
     end do
     deallocate(fieldlist)
     if (mytask == 0) then
        print *, ' c2l_fb field count = ',fieldcount
     end if
-    ! DEBUG
 
     if (mytask == 0) then
        print *, "PRINTING FIELDBUNDLES from atm->lnd"
@@ -179,8 +178,13 @@ contains
     integer, intent(out    ) :: rc
 
     ! local variables
-    type (ESMF_FieldBundle ) :: import_fieldbundle, export_fieldbundle
-    character(len=*        ) , parameter :: subname=trim(modname ) //': [cpl_lnd2atm_init] '
+    type (ESMF_FieldBundle)         :: import_fieldbundle
+    type (ESMF_FieldBundle)         :: export_fieldbundle
+    integer                         :: n
+    integer                         :: fieldcount
+    character(len=128), allocatable :: fieldlist(:)
+    character(len=128)              :: cvalue
+    character(len=*) , parameter    :: subname=trim(modname ) //': [cpl_lnd2atm_init] '
     !---------------------------------------------------
 
     rc = ESMF_SUCCESS
@@ -193,8 +197,38 @@ contains
     call ESMF_StateGet(importState, "l2c_fb", import_fieldbundle, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
 
+    call ESMF_FieldBundleGet(import_fieldbundle, fieldCount=fieldCount, rc=rc) 
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+    write(cvalue,*) fieldcount
+    call ESMF_LogWrite(subname//" l2c_fb field count = "//trim(cvalue), ESMF_LOGMSG_INFO)
+    allocate(fieldlist(fieldcount))
+    call ESMF_FieldBundleGet(import_fieldbundle, fieldNameList=fieldlist, rc=rc) 
+    do n = 1,fieldCount
+       write(cvalue,*) n 
+       call ESMF_LogWrite(subname//" l2c_fb field "//trim(cvalue)//' = '//trim(fieldlist(n)), ESMF_LOGMSG_INFO)
+    end do
+    deallocate(fieldlist)
+    if (mytask == 0) then
+       print *, ' l2c_fb field count = ',fieldcount
+    end if
+
     call ESMF_StateGet(exportState, "c2a_fb", export_fieldbundle, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+
+    call ESMF_FieldBundleGet(export_fieldbundle, fieldCount=fieldCount, rc=rc) 
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+    write(cvalue,*) fieldcount
+    call ESMF_LogWrite(subname//" c2a_fb field count = "//trim(cvalue), ESMF_LOGMSG_INFO)
+    allocate(fieldlist(fieldcount))
+    call ESMF_FieldBundleGet(export_fieldbundle, fieldNameList=fieldlist, rc=rc) 
+    do n = 1,fieldCount
+       write(cvalue,*) n 
+       call ESMF_LogWrite(subname//" c2a_fb field "//trim(cvalue)//' = '//trim(fieldlist(n)), ESMF_LOGMSG_INFO)
+    end do
+    deallocate(fieldlist)
+    if (mytask == 0) then
+       print *, ' c2a_fb field count = ',fieldcount
+    end if
 
     call ESMF_FieldBundleRedistStore(import_fieldbundle, export_fieldbundle, routehandle=rh_lnd2atm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return

@@ -16,12 +16,11 @@ program demo_lilac_driver
 
     use ESMF
     use lilac_mod   , only : lilac_init, lilac_run, lilac_final
-    use lilac_utils , only : lilac_atm2lnd, lilac_lnd2atm, this_clock, gindex_atm
+    use lilac_utils , only : lilac_atm2lnd, lilac_lnd2atm, gindex_atm
     use mpi         , only : MPI_COMM_WORLD, MPI_COMM_NULL, MPI_Init, MPI_FINALIZE, MPI_SUCCESS
 
     implicit none
 
-    type (this_clock)      :: this_time
     integer                :: comp_comm
     integer                :: ierr
     real    , allocatable  :: centerCoords(:,:)
@@ -66,7 +65,9 @@ program demo_lilac_driver
     !-----------------------------------------------------------------------------
     filename = '/glade/p/cesmdata/cseg/inputdata/share/meshes/fv4x5_050615_polemod_ESMFmesh.nc'
     call read_netcdf_mesh(filename, nglobal)
-    print *, "number of global points is is:", nglobal
+    if (mytask == 0 ) then
+       print *, "number of global points is is:", nglobal
+    end if
 
     !-----------------------------------------------------------------------------
     ! atmosphere domain decomposition
@@ -88,9 +89,6 @@ program demo_lilac_driver
        gindex_atm(i_local) = i_global
        i_global = i_global + 1
     end do
-
-    print *, "size gindex_atm for ", mytask,"is: ", size(gindex_atm)
-    print *, "gindex_atm for      ", mytask,"is: ", gindex_atm
 
     !------------------------------------------------------------------------
     ! Initialize lilac
@@ -132,9 +130,11 @@ program demo_lilac_driver
 
     call lilac_final( )
 
-    print *,  "======================================="
-    print *,  " ............. DONE ..................."
-    print *,  "======================================="
+    if (mytask == 0 ) then
+       print *,  "======================================="
+       print *,  " ............. DONE ..................."
+       print *,  "======================================="
+    end if
 
   !=====================
   contains
@@ -177,17 +177,19 @@ program demo_lilac_driver
       ierror = nf90_inquire_dimension(idfile, dimid_coordDim    , string, coordDim  )
       call nc_check_err(ierror, "inq_dim coordDim", filename)
 
-      print *,  "======================================="
-      print *, "number of elements is : ", nelem
-      print *, "coordDim is :", coordDim
-      print *,  "======================================="
+      if (mytask == 0 ) then
+         print *,  "======================================="
+         print *, "number of elements is : ", nelem
+         print *, "coordDim is :", coordDim
+         print *,  "======================================="
+      end if
 
       allocate (centerCoords(coordDim, nelem))
 
       ! Get coordinate values
       ierror = nf90_inq_varid(idfile, 'centerCoords' , idvar_centerCoords    )
       call nc_check_err(ierror, "inq_varid centerCoords", filename)
-      ierror = nf90_get_var(idfile, idvar_CenterCoords     , centerCoords     , start=(/ 1,1/)   , count=(/ coordDim, nelem /)     )
+      ierror = nf90_get_var(idfile, idvar_CenterCoords, centerCoords, start=(/ 1,1/), count=(/ coordDim, nelem /))
       call nc_check_err(ierror,"get_var CenterCoords", filename)
 
       nglobal = nelem
@@ -305,6 +307,7 @@ program demo_lilac_driver
       call lilac_lnd2atm('Sl_u10'   , data)
       call lilac_lnd2atm('Sl_fv'    , data)
       call lilac_lnd2atm('Sl_ram1'  , data)
+
     end subroutine lilac_to_atm
 
 end program demo_lilac_driver

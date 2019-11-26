@@ -14,8 +14,9 @@ module lilac_atmcap
 
   public :: atmos_register
 
+  integer                 :: mytask 
   character(*), parameter :: modname =  "atmos_cap"
-  integer, parameter      :: debug = 1 ! internal debug level
+  integer, parameter      :: debug = 0 ! internal debug level
 
 !========================================================================
 contains
@@ -25,10 +26,20 @@ contains
 
     type(ESMF_GridComp)          :: comp   ! must not be optional
     integer, intent(out)         :: rc
+
+    ! local variables
+    type(ESMF_VM)                :: vm
     character(len=*), parameter  :: subname=trim(modname)//':(atmos_register) '
     !-------------------------------------------------------------------------
 
-    print *, "in user register routine"
+    call ESMF_VMGetGlobal(vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+    call ESMF_VMGet(vm, localPet=mytask, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
+
+    if (mytask == 0) then
+       print *, "in user register routine"
+    end if
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -93,7 +104,9 @@ contains
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
 
     call ESMF_LogWrite(subname//"Mesh for atmosphere is created!", ESMF_LOGMSG_INFO)
-    !print *, "!Mesh for atmosphere is created!"
+    if (mytask == 0) then
+       !print *, "!Mesh for atmosphere is created!"
+    end if
 
     !-------------------------------------------------------------------------
     ! Atmosphere to Coupler (land) Fields --  atmos --> land
@@ -116,14 +129,18 @@ contains
     end do
 
     call ESMF_LogWrite(subname//"fieldbundleadd is finished .... !", ESMF_LOGMSG_INFO)
-    print *, "!Fields to  Coupler (atmos to  land ) (a2c_fb) Field Bundle Created!"
+    if (mytask == 0) then
+       print *, "!Fields to  Coupler (atmos to  land ) (a2c_fb) Field Bundle Created!"
+    end if
 
     ! Add field bundle to state
     call ESMF_StateAdd(atm2lnd_a_state, (/a2c_fb/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=__FILE__)) return
 
     call ESMF_LogWrite(subname//"atm2lnd_a_state is filled with dummy_var field bundle!", ESMF_LOGMSG_INFO)
-    print *, "!atm2lnd_a_state is filld with dummy_var field bundle!"
+    if (mytask == 0) then
+       print *, "!atm2lnd_a_state is filld with dummy_var field bundle!"
+    end if
 
     !-------------------------------------------------------------------------
     ! Coupler (land) to Atmosphere Fields --  c2a
